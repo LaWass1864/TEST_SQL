@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration YAML vers SQL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            color: #2c3e50;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        header {
+            margin-bottom: 80px;
+            padding-bottom: 40px;
+            border-bottom: 2px solid #2c3e50;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            letter-spacing: -0.5px;
+        }
+
+        .meta {
+            color: #7f8c8d;
+            font-size: 1em;
+        }
+
+        .slide {
+            background: white;
+            padding: 50px;
+            margin-bottom: 60px;
+            border: 1px solid #e0e0e0;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .slide:nth-child(n) {
+            animation-delay: calc(0.05s * var(--slide-index));
+        }
+
+        .slide-number {
+            font-size: 0.9em;
+            color: #95a5a6;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            color: #34495e;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .concept {
+            padding: 25px;
+            background: #f8f9fa;
+            border-left: 3px solid #2c3e50;
+            margin: 30px 0;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .comparison-item {
+            padding: 25px;
+            background: #f8f9fa;
+            border-left: 3px solid #95a5a6;
+        }
+
+        .comparison-item h4 {
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .tool {
+            padding: 25px;
+            background: #ecf0f1;
+            margin: 30px 0;
+        }
+
+        .tool strong {
+            color: #2c3e50;
+        }
+
+        ol, ul {
+            margin: 20px 0 20px 25px;
+        }
+
+        li {
+            margin: 12px 0;
+            color: #555;
+        }
+
+        li strong {
+            color: #2c3e50;
+        }
+
+        code {
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .kbd {
+            background: #34495e;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9em;
+            display: inline-block;
+            margin: 0 3px;
+        }
+
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 25px;
+            margin: 25px 0;
+            overflow-x: auto;
+            font-size: 0.95em;
+            line-height: 1.6;
+            border-left: 3px solid #34495e;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        .note {
+            padding: 20px;
+            background: #f8f9fa;
+            margin: 25px 0;
+            border-left: 3px solid #95a5a6;
+        }
+
+        .warning {
+            padding: 20px;
+            background: #fff5f5;
+            margin: 25px 0;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .warning strong {
+            color: #c0392b;
+        }
+
+        .exercise {
+            padding: 25px;
+            background: #fffbf0;
+            margin: 25px 0;
+            border-left: 3px solid #f39c12;
+        }
+
+        .exercise h4 {
+            color: #d68910;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .troubleshooting {
+            padding: 30px;
+            background: #f8f9fa;
+            margin: 30px 0;
+            border: 2px solid #2c3e50;
+        }
+
+        .troubleshooting h4 {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .troubleshooting ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .troubleshooting li {
+            margin: 15px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .troubleshooting li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .timeline {
+            margin: 40px 0;
+            padding: 30px;
+            background: white;
+            border: 2px solid #2c3e50;
+        }
+
+        .timeline h3 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+
+        .timeline-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 20px;
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-time {
+            font-weight: 600;
+            min-width: 140px;
+            color: #2c3e50;
+        }
+
+        .timeline-content {
+            flex: 1;
+            color: #555;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #34495e;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 40px 20px; }
+            .slide { padding: 30px 25px; }
+            .comparison { grid-template-columns: 1fr; }
+            .navigation { bottom: 15px; right: 15px; }
+        }
+
+        @media print {
+            .navigation { display: none; }
+            .slide { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Migration de données YAML vers SQL</h1>
+            <div class="meta">
+                Durée : 3h15 | Objectif : Créer, remplir et manipuler une base de données réelle
+                <br>Date : 04 Février 2026
+            </div>
+        </header>
+
+        <!-- SLIDE 1 -->
+        <div class="slide" style="--slide-index: 0">
+            <div class="slide-number">Slide 1</div>
+            <h2>Le SQL, c'est quoi ?</h2>
+
+            <div class="concept">
+                <strong>Le concept :</strong> Le SQL (Structured Query Language) est le langage qui permet de parler à une base de données.
+            </div>
+
+            <div class="comparison">
+                <div class="comparison-item">
+                    <h4>YAML</h4>
+                    <p>C'est une liste de courses sur un papier. C'est bien pour lire, mais difficile pour trier ou chercher.</p>
+                </div>
+                <div class="comparison-item">
+                    <h4>SQL</h4>
+                    <p>C'est un entrepôt automatisé. On peut lui demander : "Donne-moi tous les serveurs qui sont à Paris et qui sont éteints", et il répond en 0.001 seconde.</p>
+                </div>
+            </div>
+
+            <div class="tool">
+                <p><strong>L'outil : SQLite</strong></p>
+                <p>Nous utilisons SQLite. Sa force : la base de données est un simple fichier <code>.db</code> qui reste dans votre dossier de projet.</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 2 - NOUVELLE -->
+        <div class="slide" style="--slide-index: 1">
+            <div class="slide-number">Slide 2</div>
+            <h2>Votre fichier source YAML</h2>
+
+            <div class="concept">
+                <strong>Point de départ :</strong> Vous avez déjà un fichier <code>.yml</code> dans votre dossier projet. C'est votre source de données.
+            </div>
+
+            <h3>À quoi ressemble votre fichier YAML ?</h3>
+            <p>Exemple typique d'un fichier <code>donnees.yml</code> :</p>
+            
+            <pre><code>- pseudo: "chef_serveur"
+  ip: "192.168.1.1"
+  port: 8080
+
+- pseudo: "serveur_backup"
+  ip: "192.168.1.2"
+  port: 8081
+
+- pseudo: "serveur_web"
+  ip: "192.168.1.3"
+  port: 80</code></pre>
+
+            <div class="note">
+                <p><strong>Ce que contient ce fichier :</strong></p>
+                <ul>
+                    <li><code>pseudo</code> : Le nom du serveur</li>
+                    <li><code>ip</code> : L'adresse IP</li>
+                    <li><code>port</code> : Le numéro de port</li>
+                </ul>
+                <p>Chaque bloc commençant par <code>-</code> représente une ligne de données.</p>
+            </div>
+
+            <h3>Le problème du YAML</h3>
+            <div class="comparison">
+                <div class="comparison-item yaml-box">
+                    <h4>Limitations</h4>
+                    <ul>
+                        <li>Difficile de chercher une information précise</li>
+                        <li>Impossible de filtrer (ex: tous les ports > 8000)</li>
+                        <li>Pas de mise à jour facile</li>
+                        <li>Lecture séquentielle uniquement</li>
+                    </ul>
+                </div>
+                <div class="comparison-item sql-box">
+                    <h4>C'est pourquoi on migre vers SQL</h4>
+                    <ul>
+                        <li>Recherche instantanée</li>
+                        <li>Filtres puissants</li>
+                        <li>Modification ciblée</li>
+                        <li>Requêtes complexes possibles</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note">
+                <p><strong>Important :</strong> Pendant toute la formation, on ne modifie PAS le fichier YAML. On le lit uniquement pour le traduire en SQL.</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 3 - ancien Slide 2 -->
+        <div class="slide" style="--slide-index: 2">
+            <div class="slide-number">Slide 3</div>
+            <h2>Étape 0 - Installation et Setup</h2>
+
+            <p><strong>Avant de coder, préparez votre établi :</strong></p>
+
+            <ol>
+                <li><strong>Extensions VS Code :</strong> Installez <code>SQLite</code> (pour les ordres) et <code>SQLite Viewer</code> (pour voir le résultat).</li>
+                <li><strong>Organisation :</strong> Ouvrez votre dossier projet qui contient déjà votre <code>.yml</code>.</li>
+                <li><strong>Fichiers :</strong> Créez deux fichiers vides : <code>projet.db</code> et <code>migration.sql</code>.</li>
+            </ol>
+
+            <h3>Connexion</h3>
+            <p><strong>PC :</strong> <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">P</span> → <code>SQLite: Open Database</code> → <code>projet.db</code></p>
+            <p><strong>MAC :</strong> <span class="kbd">Cmd</span> + <span class="kbd">Shift</span> + <span class="kbd">P</span> → <code>SQLite: Open Database</code> → <code>projet.db</code></p>
+        </div>
+
+        <!-- SLIDE 4 -->
+        <div class="slide" style="--slide-index: 3">
+            <div class="slide-number">Slide 4</div>
+            <h2>La Commande CREATE TABLE</h2>
+
+            <div class="concept">
+                <strong>Le But :</strong> Créer le tableau (l'étagère) avant d'y mettre les données.
+            </div>
+
+            <h3>Le Code</h3>
+            <pre><code>CREATE TABLE netflix (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titre TEXT,
+    saisons INTEGER,
+    episodes_total INTEGER,
+    acteur_principal TEXT,
+    genre TEXT,
+    annee_sortie INTEGER,
+    note INTEGER
+);</code></pre>
+
+            <div class="note">
+                <p><strong>Explication :</strong></p>
+                <p><code>TEXT</code> = mots, <code>INTEGER</code> = chiffres.</p>
+                <p>L'<code>id</code> est le numéro de ligne automatique.</p>
+            </div>
+
+            <div class="note">
+                <p><strong>Le Geste :</strong> Surlignez le code → Clic droit → <code>Run Query</code>.</p>
+            </div>
+
+            <div class="warning">
+                <p><strong>Le Piège :</strong> On ne lance cette commande qu'UNE SEULE FOIS.</p>
+            </div>
+
+            <div class="exercise">
+                <h4>Exercice 1 : Créez votre table Netflix</h4>
+                <ol>
+                    <li>Ouvrez votre fichier <code>commandes.sql</code></li>
+                    <li>Copiez le code CREATE TABLE ci-dessus</li>
+                    <li>Surlignez tout le code</li>
+                    <li>Clic droit → <code>Run Query</code></li>
+                    <li>Ouvrez votre fichier <code>projet.db</code> avec SQLite Viewer</li>
+                    <li>Vérifiez que la table <code>netflix</code> apparaît dans la liste des tables</li>
+                </ol>
+                <p><strong>Résultat attendu :</strong> La table netflix est visible dans le panneau de gauche du SQLite Viewer.</p>
+            </div>
+
+            <h3>Comment supprimer une table</h3>
+            <p>Si vous avez besoin de recommencer ou si vous avez fait une erreur :</p>
+            <pre><code>DROP TABLE IF EXISTS netflix;</code></pre>
+            <div class="note">
+                <p><strong>Bonne pratique :</strong> Utilisez toujours <code>IF EXISTS</code> pour éviter les erreurs si la table n'existe pas.</p>
+            </div>
+            <div class="warning">
+                <p><strong>Attention :</strong> Cette commande supprime la table ET toutes les données qu'elle contient. Il n'y a pas de retour en arrière possible.</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 5 -->
+        <div class="slide" style="--slide-index: 4">
+            <div class="slide-number">Slide 5</div>
+            <h2>La Commande INSERT INTO</h2>
+
+            <div class="concept">
+                <strong>Le But :</strong> Copier vos données du YAML vers le SQL.
+            </div>
+
+            <h3>Le Code</h3>
+            <pre><code>INSERT INTO netflix (titre, saisons, episodes_total, acteur_principal, genre, annee_sortie, note) 
+VALUES ('Stranger Things', 5, 42, 'Millie Bobby Brown', 'Science-Fiction', 2016, 9);</code></pre>
+
+            <div class="note">
+                <p><strong>Explication :</strong> On liste les colonnes, puis les valeurs.</p>
+            </div>
+
+            <div class="warning">
+                <p><strong>Le Piège :</strong> Le texte se met entre simples guillemets <code>' '</code>. Pas de guillemets pour les chiffres.</p>
+            </div>
+
+            <h3>Insérer plusieurs séries à la fois</h3>
+            <pre><code>INSERT INTO netflix (titre, saisons, episodes_total, acteur_principal, genre, annee_sortie, note) 
+VALUES 
+    ('The Witcher', 3, 24, 'Henry Cavill', 'Fantasy', 2019, 8),
+    ('Squid Game', 2, 17, 'Lee Jung-jae', 'Thriller', 2021, 9),
+    ('Mercredi', 2, 16, 'Jenna Ortega', 'Comédie Noire', 2022, 8),
+    ('Lupin', 3, 17, 'Omar Sy', 'Policier', 2021, 8);</code></pre>
+
+            <div class="exercise">
+                <h4>Exercice</h4>
+                <p>Traduisez au moins 10 lignes de votre fichier YAML en lignes <code>INSERT</code>.</p>
+                <p>Ajoutez vos séries préférées dans la table Netflix !</p>
+                <p>C'est l'étape la plus longue (Migration).</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 6 -->
+        <div class="slide" style="--slide-index: 5">
+            <div class="slide-number">Slide 6</div>
+            <h2>La Commande SELECT</h2>
+
+            <div class="concept">
+                <strong>Le But :</strong> Interroger la base pour vérifier les données.
+            </div>
+
+            <h3>Le Code</h3>
+            <pre><code>SELECT * FROM netflix WHERE genre = 'Science-Fiction';</code></pre>
+
+            <div class="note">
+                <p><strong>Explication :</strong></p>
+                <p><code>*</code> veut dire "Toutes les colonnes".</p>
+                <p><code>WHERE</code> est votre filtre de recherche.</p>
+            </div>
+
+            <div class="note">
+                <p><strong>Le Geste :</strong> Le résultat apparaît à droite dans l'onglet <code>SQLite Result</code>.</p>
+            </div>
+
+            <div class="note">
+                <p><strong>Que se passe-t-il quand j'exécute un SELECT ?</strong></p>
+                <p>Un nouvel onglet appelé <code>SQLite</code> s'ouvre au centre de VS Code. C'est une fenêtre temporaire qui affiche les résultats de votre requête.</p>
+                <p><strong>Ce n'est PAS un nouveau fichier</strong>, juste une zone d'affichage des résultats !</p>
+                <p>Vous pouvez fermer cet onglet à tout moment, vos données restent dans <code>projet.db</code>.</p>
+            </div>
+
+            <h3>Exemples de recherches utiles</h3>
+            <pre><code>-- Toutes les séries
+SELECT * FROM netflix;
+
+-- Uniquement les titres
+SELECT titre FROM netflix;
+
+-- Séries avec note supérieure à 8
+SELECT * FROM netflix WHERE note > 8;
+
+-- Séries sorties après 2020
+SELECT titre, annee_sortie FROM netflix WHERE annee_sortie > 2020;
+
+-- Compter le nombre de séries
+SELECT COUNT(*) FROM netflix;</code></pre>
+
+            <div class="exercise">
+                <h4>Exercice</h4>
+                <p>Faites une recherche pour afficher uniquement les titres des séries dont l'ID est supérieur à 5.</p>
+                <p>Affichez toutes les séries de genre 'Thriller'.</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 7 -->
+        <div class="slide" style="--slide-index: 6">
+            <div class="slide-number">Slide 7</div>
+            <h2>La Commande UPDATE</h2>
+
+            <div class="concept">
+                <strong>Le But :</strong> Modifier une information sans tout supprimer.
+            </div>
+
+            <h3>Le Code</h3>
+            <pre><code>UPDATE netflix 
+SET note = 10 
+WHERE titre = 'Stranger Things';</code></pre>
+
+            <div class="note">
+                <p><strong>Explication :</strong> On définit quelle colonne on change (<code>SET</code>) et sur quelle ligne (<code>WHERE</code>).</p>
+            </div>
+
+            <h3>Bonne pratique : Vérifier avant de modifier</h3>
+            <pre><code>-- 1. D'abord, vérifier quelle ligne on va modifier
+SELECT * FROM netflix WHERE titre = 'Lupin';
+
+-- 2. Ensuite, modifier
+UPDATE netflix SET note = 9 WHERE titre = 'Lupin';</code></pre>
+
+            <h3>Autres exemples d'UPDATE</h3>
+            <pre><code>-- Modifier plusieurs colonnes à la fois
+UPDATE netflix 
+SET saisons = 4, episodes_total = 32 
+WHERE titre = 'The Witcher';
+
+-- Modifier par ID (plus précis)
+UPDATE netflix 
+SET note = 10 
+WHERE id = 3;
+
+-- Augmenter une valeur existante
+UPDATE netflix 
+SET note = note + 1 
+WHERE genre = 'Fantasy';</code></pre>
+
+            <div class="warning">
+                <p><strong>Le Piège MORTEL :</strong> Si vous oubliez le <code>WHERE</code>, TOUTE votre table sera modifiée avec la même valeur !</p>
+                <p>Exemple : <code>UPDATE netflix SET note = 5;</code> mettra la note 5 à TOUTES les séries.</p>
+            </div>
+
+            <div class="exercise">
+                <h4>Exercice</h4>
+                <p>Changez la note d'une de vos séries.</p>
+                <p>Modifiez le nombre de saisons d'une série qui a eu une nouvelle saison.</p>
+                <p>N'oubliez pas : SELECT d'abord pour vérifier, UPDATE ensuite !</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 8 -->
+        <div class="slide" style="--slide-index: 7">
+            <div class="slide-number">Slide 8</div>
+            <h2>La Commande DELETE</h2>
+
+            <div class="concept">
+                <strong>Le But :</strong> Supprimer proprement une ligne.
+            </div>
+
+            <h3>Le Code</h3>
+            <pre><code>DELETE FROM netflix 
+WHERE id = 3;</code></pre>
+
+            <div class="note">
+                <p><strong>Explication :</strong> On supprime la ligne correspondante.</p>
+            </div>
+
+            <h3>Autres exemples de DELETE</h3>
+            <pre><code>-- Supprimer par titre
+DELETE FROM netflix 
+WHERE titre = 'Mercredi';
+
+-- Supprimer toutes les séries avec une note inférieure à 5
+DELETE FROM netflix 
+WHERE note < 5;</code></pre>
+
+            <div class="warning">
+                <p><strong>Le Danger :</strong> <code>DELETE FROM netflix;</code> (sans <code>WHERE</code>) vide toute votre table d'un coup.</p>
+            </div>
+
+            <div class="exercise">
+                <h4>Exercice</h4>
+                <p>Insérez une série "test" et supprimez-la immédiatement.</p>
+                <p>Exemple : <code>INSERT INTO netflix (titre, note) VALUES ('Test Serie', 1);</code></p>
+            </div>
+        </div>
+
+        <!-- SLIDE 9 -->
+        <div class="slide" style="--slide-index: 8">
+            <div class="slide-number">Slide 9</div>
+            <h2>Guide de Dépannage</h2>
+            <p style="text-align: center; margin-bottom: 30px;"><strong>À LAISSER AFFICHÉ</strong></p>
+
+            <div class="troubleshooting">
+                <h4>Lisez ceci avant de solliciter le formateur :</h4>
+                <ul>
+                    <li><strong>Erreur "Table already exists" :</strong> C'est normal. Vous avez déjà créé la table. Effacez la ligne <code>CREATE</code> de votre fichier <code>.sql</code> ou utilisez <code>DROP TABLE IF EXISTS netflix;</code> avant de recréer.</li>
+                    
+                    <li><strong>Je ne vois rien dans mon tableau .db :</strong> Clic droit sur <code>projet.db</code> → <code>Open with SQLite Viewer</code>. Cliquez sur le bouton Refresh (🔄) en haut.</li>
+                    
+                    <li><strong>Rien ne se passe :</strong> Avez-vous SURLIGNÉ votre code avant de faire <code>Clic droit > Run Query</code> ?</li>
+                    
+                    <li><strong>Erreur de syntaxe :</strong> Vérifiez les virgules entre les valeurs et le point-virgule <code>;</code> à la fin de chaque commande.</li>
+
+                    <li><strong>Guillemets dans les titres :</strong> Pour un titre comme "L'incroyable", utilisez des guillemets doubles : <code>"L'incroyable"</code> ou échappez l'apostrophe : <code>'L''incroyable'</code></li>
+                </ul>
+            </div>
+
+            <h3>Raccourcis</h3>
+            <p><strong>PC :</strong> <span class="kbd">Ctrl+S</span> (Sauvegarder) | <span class="kbd">Ctrl+Shift+P</span> (Commandes)</p>
+            <p><strong>MAC :</strong> <span class="kbd">Cmd+S</span> (Sauvegarder) | <span class="kbd">Cmd+Shift+P</span> (Commandes)</p>
+        </div>
+
+        <!-- SLIDE 10 - EXERCICE FINAL -->
+        <div class="slide" style="--slide-index: 9">
+            <div class="slide-number">Slide 10</div>
+            <h2>À vous de jouer : Migrez VOTRE fichier YAML</h2>
+
+            <div class="concept">
+                <strong>Objectif :</strong> Appliquer tout ce que vous avez appris avec Netflix sur VOTRE propre fichier YAML.
+            </div>
+
+            <h3>Les étapes à suivre</h3>
+            <ol>
+                <li><strong>Ouvrez votre fichier .yml</strong> et analysez sa structure</li>
+                <li><strong>Créez votre table SQL</strong> adaptée à vos données</li>
+                <li><strong>Traduisez vos données</strong> en commandes INSERT (minimum 10 lignes)</li>
+                <li><strong>Testez vos requêtes</strong> SELECT, UPDATE, DELETE</li>
+            </ol>
+
+            <h3>Exemple de conversion</h3>
+            
+            <div class="comparison">
+                <div class="comparison-item">
+                    <h4>Votre fichier YAML</h4>
+                    <pre style="margin: 0; font-size: 0.85em;"><code>serveurs:
+  - nom: Web-Main
+    ip: 192.168.1.10
+    port: 80
+  - nom: Database
+    ip: 192.168.1.20
+    port: 3306</code></pre>
+                </div>
+                <div class="comparison-item">
+                    <h4>Devient en SQL</h4>
+                    <pre style="margin: 0; font-size: 0.85em;"><code>CREATE TABLE serveurs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nom TEXT,
+  ip TEXT,
+  port INTEGER
+);
+
+INSERT INTO serveurs (nom, ip, port)
+VALUES ('Web-Main', '192.168.1.10', 80);</code></pre>
+                </div>
+            </div>
+
+            <div class="exercise">
+                <h4>Consignes de l'exercice</h4>
+                <ul>
+                    <li>Créez un nouveau fichier <code>migration.sql</code> pour votre projet</li>
+                    <li>Traduisez au minimum 10 lignes de votre YAML</li>
+                    <li>Vérifiez vos données avec des requêtes SELECT</li>
+                    <li>Faites au moins 1 UPDATE et 1 DELETE pour tester</li>
+                    <li>À la fin : capture d'écran de votre SQLite Viewer rempli</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <p><strong>Astuce :</strong> Copiez-collez votre première ligne INSERT et changez juste les valeurs pour gagner du temps !</p>
+            </div>
+
+            <div class="note">
+                <p><strong>Si vous êtes bloqué :</strong> Relisez les slides Netflix, les commandes sont exactement les mêmes, seuls les noms de table et de colonnes changent.</p>
+            </div>
+        </div>
+
+        <!-- TIMELINE -->
+        <div class="slide" style="--slide-index: 10">
+            <div class="timeline">
+                <h3>Plan de match pour tenir 3h15</h3>
+                
+                <div class="timeline-item">
+                    <div class="timeline-time">00:00 - 00:20</div>
+                    <div class="timeline-content">Présentation Slides 1, 2 & 3 (Introduction + Installation)</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-time">00:20 - 01:00</div>
+                    <div class="timeline-content">Travail sur le CREATE (Slide 4)</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-time">01:00 - 02:15</div>
+                    <div class="timeline-content">Travail sur le INSERT (Migration longue - Slide 5)</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-time">02:15 - 03:00</div>
+                    <div class="timeline-content">Tests de recherche et modifs avec Netflix (Slides 6, 7, 8)</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-time">03:00 - 03:10</div>
+                    <div class="timeline-content">Application sur votre fichier YAML (Slide 10)</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-time">03:10 - 03:15</div>
+                    <div class="timeline-content">Vérification finale et captures d'écran</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="scrollToTop()">Haut</button>
+        <button class="nav-btn" onclick="window.print()">Imprimer</button>
+    </div>
+
+    <script>
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.slide').forEach(slide => {
+            observer.observe(slide);
+        });
+    </script>
+</body>
+</html>
