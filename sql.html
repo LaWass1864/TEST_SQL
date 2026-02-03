@@ -516,10 +516,20 @@ VALUES
     ('Lupin', 3, 17, 'Omar Sy', 'Policier', 2021, 8);</code></pre>
 
             <div class="exercise">
-                <h4>Exercice</h4>
-                <p>Traduisez au moins 10 lignes de votre fichier YAML en lignes <code>INSERT</code>.</p>
-                <p>Ajoutez vos séries préférées dans la table Netflix !</p>
-                <p>C'est l'étape la plus longue (Migration).</p>
+                <h4>Exercice 2 : Remplissez votre base Netflix</h4>
+                <p><strong>Étape 1 :</strong> Insérez ces 4 séries une par une</p>
+                <ol>
+                    <li>Copiez la première ligne INSERT (Stranger Things)</li>
+                    <li>Surlignez-la</li>
+                    <li>Clic droit → <code>Run Query</code></li>
+                    <li>Cliquez sur 🔄 dans le SQLite Viewer pour voir la série ajoutée</li>
+                    <li>Répétez pour The Witcher, Squid Game et Mercredi</li>
+                </ol>
+                
+                <p><strong>Étape 2 :</strong> Insérez VOS séries préférées</p>
+                <p>Ajoutez au minimum 6 autres séries de votre choix en copiant-collant le format INSERT et en changeant les valeurs.</p>
+                
+                <p><strong>Résultat attendu :</strong> Vous devez avoir au moins 10 séries dans votre table netflix.</p>
             </div>
         </div>
 
@@ -569,9 +579,25 @@ SELECT titre, annee_sortie FROM netflix WHERE annee_sortie > 2020;
 SELECT COUNT(*) FROM netflix;</code></pre>
 
             <div class="exercise">
-                <h4>Exercice</h4>
-                <p>Faites une recherche pour afficher uniquement les titres des séries dont l'ID est supérieur à 5.</p>
-                <p>Affichez toutes les séries de genre 'Thriller'.</p>
+                <h4>Exercice 3 : Interrogez votre base</h4>
+                <p>Testez ces 5 requêtes dans l'ordre :</p>
+                <ol>
+                    <li><strong>Afficher toutes les séries :</strong><br>
+                    <code>SELECT * FROM netflix;</code></li>
+                    
+                    <li><strong>Afficher uniquement les titres :</strong><br>
+                    <code>SELECT titre FROM netflix;</code></li>
+                    
+                    <li><strong>Trouver les séries avec une note > 8 :</strong><br>
+                    <code>SELECT * FROM netflix WHERE note > 8;</code></li>
+                    
+                    <li><strong>Trouver les séries de Science-Fiction :</strong><br>
+                    <code>SELECT titre, note FROM netflix WHERE genre = 'Science-Fiction';</code></li>
+                    
+                    <li><strong>Compter le nombre total de séries :</strong><br>
+                    <code>SELECT COUNT(*) FROM netflix;</code></li>
+                </ol>
+                <p><strong>Pour chaque requête :</strong> Surlignez le code → Run Query → Observez les résultats dans l'onglet SQLite</p>
             </div>
         </div>
 
@@ -622,10 +648,27 @@ WHERE genre = 'Fantasy';</code></pre>
             </div>
 
             <div class="exercise">
-                <h4>Exercice</h4>
-                <p>Changez la note d'une de vos séries.</p>
-                <p>Modifiez le nombre de saisons d'une série qui a eu une nouvelle saison.</p>
-                <p>N'oubliez pas : SELECT d'abord pour vérifier, UPDATE ensuite !</p>
+                <h4>Exercice 4 : Modifiez vos données</h4>
+                <p>Réalisez ces 3 modifications :</p>
+                <ol>
+                    <li><strong>Vérifier d'abord :</strong><br>
+                    <code>SELECT * FROM netflix WHERE titre = 'Stranger Things';</code></li>
+                    
+                    <li><strong>Modifier la note :</strong><br>
+                    <code>UPDATE netflix SET note = 10 WHERE titre = 'Stranger Things';</code></li>
+                    
+                    <li><strong>Vérifier le changement :</strong><br>
+                    <code>SELECT * FROM netflix WHERE titre = 'Stranger Things';</code><br>
+                    Cliquez sur 🔄 dans le SQLite Viewer</li>
+                </ol>
+                
+                <p><strong>À vous maintenant :</strong></p>
+                <ul>
+                    <li>Modifiez le nombre de saisons d'une série de votre choix</li>
+                    <li>Changez le genre d'une autre série</li>
+                </ul>
+                
+                <p><strong>⚠️ N'oubliez jamais le WHERE !</strong> Testez toujours avec SELECT avant UPDATE.</p>
             </div>
         </div>
 
@@ -660,9 +703,26 @@ WHERE note < 5;</code></pre>
             </div>
 
             <div class="exercise">
-                <h4>Exercice</h4>
-                <p>Insérez une série "test" et supprimez-la immédiatement.</p>
-                <p>Exemple : <code>INSERT INTO netflix (titre, note) VALUES ('Test Serie', 1);</code></p>
+                <h4>Exercice 5 : Supprimez des données</h4>
+                <p>Testez la suppression en toute sécurité :</p>
+                <ol>
+                    <li><strong>Insérez une série de test :</strong><br>
+                    <code>INSERT INTO netflix (titre, saisons, note) VALUES ('Serie Test', 1, 1);</code></li>
+                    
+                    <li><strong>Vérifiez qu'elle existe :</strong><br>
+                    <code>SELECT * FROM netflix WHERE titre = 'Serie Test';</code><br>
+                    Notez son ID (par exemple: 11)</li>
+                    
+                    <li><strong>Supprimez-la par ID :</strong><br>
+                    <code>DELETE FROM netflix WHERE id = 11;</code><br>
+                    (Remplacez 11 par l'ID réel)</li>
+                    
+                    <li><strong>Vérifiez la suppression :</strong><br>
+                    <code>SELECT * FROM netflix WHERE titre = 'Serie Test';</code><br>
+                    Résultat attendu : aucune ligne trouvée</li>
+                </ol>
+                
+                <p><strong>⚠️ Règle d'or :</strong> Toujours utiliser WHERE avec DELETE. Sans WHERE, vous videz toute la table !</p>
             </div>
         </div>
 
@@ -695,71 +755,99 @@ WHERE note < 5;</code></pre>
         <!-- SLIDE 10 - EXERCICE FINAL -->
         <div class="slide" style="--slide-index: 9">
             <div class="slide-number">Slide 10</div>
-            <h2>À vous de jouer : Migrez VOTRE fichier YAML</h2>
+            <h2>Exercice Final : Migrez VOTRE fichier YAML</h2>
 
             <div class="concept">
-                <strong>Objectif :</strong> Appliquer tout ce que vous avez appris avec Netflix sur VOTRE propre fichier YAML.
+                <strong>Rappel du déroulé de la formation :</strong>
+            </div>
+
+            <div class="comparison">
+                <div class="comparison-item">
+                    <h4>PARTIE 1 : Apprentissage (2h30)</h4>
+                    <p>Vous avez appris avec l'exemple <strong>Netflix</strong> pour comprendre toutes les commandes SQL.</p>
+                    <p>C'était de l'entraînement collectif.</p>
+                </div>
+                <div class="comparison-item">
+                    <h4>PARTIE 2 : Autonomie (45 min)</h4>
+                    <p>Maintenant, vous allez appliquer ce que vous avez appris sur <strong>VOTRE fichier YAML</strong>.</p>
+                    <p>C'est du travail individuel.</p>
+                </div>
+            </div>
+
+            <h3>Votre mission (45 minutes)</h3>
+            
+            <div class="note">
+                <p><strong>Principe : PUISER À LA SOURCE</strong></p>
+                <p>Votre fichier <code>.yml</code> est votre <strong>source de données</strong>. Vous allez le lire et recopier/traduire son contenu en SQL. Le fichier YAML ne sera pas modifié, vous le consultez uniquement.</p>
             </div>
 
             <h3>Les étapes à suivre</h3>
             <ol>
-                <li><strong>Ouvrez votre fichier .yml</strong> et analysez sa structure</li>
-                <li><strong>Créez votre table SQL</strong> adaptée à vos données</li>
-                <li><strong>Traduisez vos données</strong> en commandes INSERT (minimum 10 lignes)</li>
-                <li><strong>Testez vos requêtes</strong> SELECT, UPDATE, DELETE</li>
+                <li><strong>Ouvrez votre fichier .yml</strong> à côté de VS Code</li>
+                <li><strong>Analysez sa structure</strong> : Quels sont les champs ? (pseudo, ip, port...)</li>
+                <li><strong>Créez votre table SQL</strong> adaptée à votre structure</li>
+                <li><strong>Traduisez ligne par ligne</strong> chaque entrée YAML en INSERT SQL</li>
+                <li><strong>Testez vos données</strong> avec des SELECT</li>
             </ol>
 
             <h3>Exemple de conversion</h3>
             
             <div class="comparison">
                 <div class="comparison-item">
-                    <h4>Votre fichier YAML</h4>
-                    <pre style="margin: 0; font-size: 0.85em;"><code>serveurs:
-  - nom: Web-Main
-    ip: 192.168.1.10
-    port: 80
-  - nom: Database
-    ip: 192.168.1.20
-    port: 3306</code></pre>
+                    <h4>📄 Vous LISEZ votre YAML</h4>
+                    <pre style="margin: 0; font-size: 0.85em;"><code>- pseudo: "serveur_web"
+  ip: "192.168.1.10"
+  port: 80
+
+- pseudo: "serveur_db"
+  ip: "192.168.1.20"
+  port: 3306</code></pre>
                 </div>
                 <div class="comparison-item">
-                    <h4>Devient en SQL</h4>
+                    <h4>📝 Vous ÉCRIVEZ en SQL</h4>
                     <pre style="margin: 0; font-size: 0.85em;"><code>CREATE TABLE serveurs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  nom TEXT,
+  pseudo TEXT,
   ip TEXT,
   port INTEGER
 );
 
-INSERT INTO serveurs (nom, ip, port)
-VALUES ('Web-Main', '192.168.1.10', 80);</code></pre>
+INSERT INTO serveurs (pseudo, ip, port)
+VALUES ('serveur_web', '192.168.1.10', 80);
+
+INSERT INTO serveurs (pseudo, ip, port)
+VALUES ('serveur_db', '192.168.1.20', 3306);</code></pre>
                 </div>
             </div>
 
             <div class="exercise">
-                <h4>Consignes de l'exercice</h4>
-                <ul>
-                    <li>Créez un nouveau fichier <code>migration.sql</code> pour votre projet</li>
-                    <li>Traduisez au minimum 10 lignes de votre YAML</li>
-                    <li>Vérifiez vos données avec des requêtes SELECT</li>
-                    <li>Faites au moins 1 UPDATE et 1 DELETE pour tester</li>
-                    <li>À la fin : capture d'écran de votre SQLite Viewer rempli</li>
-                </ul>
+                <h4>Consignes obligatoires</h4>
+                <ol>
+                    <li>Créez votre fichier <code>migration.sql</code> (ou utilisez <code>commandes.sql</code>)</li>
+                    <li>Traduisez <strong>TOUTES les entrées</strong> de votre fichier YAML en INSERT SQL</li>
+                    <li>Vérifiez que toutes vos données sont bien dans <code>serveur.db</code></li>
+                    <li><strong>LIVRABLE FINAL :</strong> Capture d'écran de votre SQLite Viewer montrant votre table remplie avec toutes vos données</li>
+                </ol>
+            </div>
+
+            <div class="warning">
+                <p><strong>⏱ Temps imparti : 45 minutes</strong></p>
+                <p><strong>📸 Livrable obligatoire :</strong> Capture d'écran de votre fichier <code>serveur.db</code> ouvert dans SQLite Viewer avec toutes vos données visibles.</p>
             </div>
 
             <div class="note">
-                <p><strong>Astuce :</strong> Copiez-collez votre première ligne INSERT et changez juste les valeurs pour gagner du temps !</p>
+                <p><strong>Astuce gain de temps :</strong> Copiez-collez votre première ligne INSERT et changez juste les valeurs pour chaque entrée de votre YAML !</p>
             </div>
 
             <div class="note">
-                <p><strong>Si vous êtes bloqué :</strong> Relisez les slides Netflix, les commandes sont exactement les mêmes, seuls les noms de table et de colonnes changent.</p>
+                <p><strong>Si vous êtes bloqué :</strong> Relisez les slides Netflix (4, 5, 6, 7, 8). Les commandes sont identiques, seuls les noms de table et de colonnes changent selon votre fichier YAML.</p>
             </div>
         </div>
 
         <!-- TIMELINE -->
         <div class="slide" style="--slide-index: 10">
             <div class="timeline">
-                <h3>Plan sur les 3h30</h3>
+                <h3>Sommaire sur 3h30</h3>
                 
                 <div class="timeline-item">
                     <div class="timeline-time">00:00 - 00:20</div>
